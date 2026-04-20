@@ -1,5 +1,5 @@
 pipeline {
-    agent {label 'akbagent'}
+    agent any
     
     environment{
         SONAR_HOME = tool "Sonar"
