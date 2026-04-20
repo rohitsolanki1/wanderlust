@@ -1,4 +1,3 @@
-@Library('Shared') _
 pipeline {
     agent {label 'akbagent'}
     
@@ -32,7 +31,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script{
-                    code_checkout("https://github.com/NotHarshhaa/DevOps-Projects/DevOps-Project-40/Devops-Mega-Project-Jenkins-ArgoCD-EKS","master")
+                    git branch: 'main', url: 'https://github.com/rohitsolanki1/Devops-Mega-Project-Jenkins-ArgoCD-EKS.git', credentialsId: 'git-credentials'
                 }
             }
         }
