@@ -95,6 +95,16 @@ pipeline {
                 }
             }
         }
+
+        stage("Create Env File"){
+            steps{
+                dir('frontend'){
+                    sh '''
+                    echo "VITE_API_URL=https://your-api" > .env.docker
+                    '''
+                }
+            }
+        }
         
         // ✅ UPDATED
         stage("Docker: Build Images"){
