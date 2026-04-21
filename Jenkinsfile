@@ -41,21 +41,18 @@ pipeline {
         stage("Docker: Build Images"){
             steps{
                 sh """
-                docker build -t thatgeekcontainer/wanderlust-backend-beta:${DOCKER_TAG} ./backend
-                docker build -t thatgeekcontainer/wanderlust-frontend-beta:${DOCKER_TAG} ./frontend
+                docker build -t localhost:5000/wanderlust-backend:${DOCKER_TAG} ./backend
+                docker build -t localhost:5000/wanderlust-frontend:${DOCKER_TAG} ./frontend
                 """
             }
         }
         
-        stage("Docker: Push to DockerHub"){
+        stage("Docker: Push to Local Registry"){
             steps{
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh """
-                    echo $PASS | docker login -u $USER --password-stdin
-                    docker push thatgeekcontainer/wanderlust-backend-beta:${DOCKER_TAG}
-                    docker push thatgeekcontainer/wanderlust-frontend-beta:${DOCKER_TAG}
-                    """
-                }
+                sh """
+                docker push localhost:5000/wanderlust-backend:${DOCKER_TAG}
+                docker push localhost:5000/wanderlust-frontend:${DOCKER_TAG}
+                """
             }
         }
     }
