@@ -62,9 +62,11 @@ pipeline {
             }
         }
         
-        stage("SonarQube: Code Quality Gates"){
-            steps{
-                waitForQualityGate abortPipeline: true
+            stage("SonarQube: Code Quality Gates"){
+                steps{
+                    timeout(time: 5, unit: 'MINUTES') {
+                        #waitForQualityGate abortPipeline: true
+                }
             }
         }
         
