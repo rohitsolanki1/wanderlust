@@ -5,22 +5,7 @@ pipeline {
         SONAR_HOME = tool "Sonar"
     }
     
-    parameters {
-        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Frontend image tag')
-        string(name: 'BACKEND_DOCKER_TAG', defaultValue: '', description: 'Backend image tag')
-    }
-    
     stages {
-
-        stage("Validate Parameters") {
-            steps {
-                script {
-                    if (params.FRONTEND_DOCKER_TAG == '' || params.BACKEND_DOCKER_TAG == '') {
-                        error("Both Docker tags are required.")
-                    }
-                }
-            }
-        }
 
         stage("Workspace cleanup"){
             steps{
@@ -35,25 +20,33 @@ pipeline {
                     credentialsId: 'jenkins-github'
             }
         }
+
+        // ✅ NEW: Generate Auto Tag
+        stage("Generate Docker Tag") {
+            steps {
+                script {
+                    def commit = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    env.DOCKER_TAG = "${BUILD_NUMBER}-${commit}"
+                    echo "Generated Tag: ${env.DOCKER_TAG}"
+                }
+            }
+        }
         
-        // ✅ FIXED
         stage("Trivy: Filesystem scan"){
             steps{
                 sh 'trivy fs .'
             }
         }
 
-        // ✅ FIXED
         stage("OWASP: Dependency check"){
             when {
                 expression { return false }
-        }
+            }
             steps{
                 echo "Skipping OWASP scan"
             }
         }
         
-        // ✅ FIXED
         stage("SonarQube: Code Analysis"){
             steps{
                 withSonarQubeEnv('Sonar') {
@@ -93,24 +86,24 @@ pipeline {
             }
         }
         
-        // ✅ FIXED
+        // ✅ UPDATED
         stage("Docker: Build Images"){
             steps{
                 sh """
-                docker build -t thatgeekcontainer/wanderlust-backend-beta:${params.BACKEND_DOCKER_TAG} ./backend
-                docker build -t thatgeekcontainer/wanderlust-frontend-beta:${params.FRONTEND_DOCKER_TAG} ./frontend
+                docker build -t thatgeekcontainer/wanderlust-backend-beta:${DOCKER_TAG} ./backend
+                docker build -t thatgeekcontainer/wanderlust-frontend-beta:${DOCKER_TAG} ./frontend
                 """
             }
         }
         
-        // ✅ FIXED
+        // ✅ UPDATED
         stage("Docker: Push to DockerHub"){
             steps{
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh """
                     echo $PASS | docker login -u $USER --password-stdin
-                    docker push thatgeekcontainer/wanderlust-backend-beta:${params.BACKEND_DOCKER_TAG}
-                    docker push thatgeekcontainer/wanderlust-frontend-beta:${params.FRONTEND_DOCKER_TAG}
+                    docker push thatgeekcontainer/wanderlust-backend-beta:${DOCKER_TAG}
+                    docker push thatgeekcontainer/wanderlust-frontend-beta:${DOCKER_TAG}
                     """
                 }
             }
