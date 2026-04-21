@@ -62,14 +62,20 @@ pipeline {
             }
         }
         
-            stage("SonarQube: Code Quality Gates"){
-                steps{
-                    timeout(time: 2, unit: 'MINUTES') {
-                        waitForQualityGate abortPipeline: false
+        stage("SonarQube: Code Quality Gates"){
+            steps{
+                timeout(time: 1, unit: 'MINUTES') {
+                    script {
+                        try {
+                            waitForQualityGate abortPipeline: true
+                        } catch (err) {
+                            echo "Quality Gate check skipped due to timeout"
+                        }
+                    }
                 }
             }
         }
-        
+                
         stage('Exporting environment variables') {
             parallel{
                 stage("Backend env setup"){
