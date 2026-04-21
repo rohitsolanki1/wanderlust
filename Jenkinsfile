@@ -41,8 +41,8 @@ pipeline {
         stage("Docker: Build Images"){
             steps{
                 sh """
-                docker build -t localhost:5000/wanderlust-backend:${DOCKER_TAG} ./backend
-                docker build -t localhost:5000/wanderlust-frontend:${DOCKER_TAG} ./frontend
+                docker build -t localhost:32100/wanderlust-backend:${DOCKER_TAG} ./backend
+                docker build -t localhost:32100/wanderlust-frontend:${DOCKER_TAG} ./frontend
                 """
             }
         }
@@ -50,8 +50,8 @@ pipeline {
         stage("Docker: Push to Local Registry"){
             steps{
                 sh """
-                docker push localhost:5000/wanderlust-backend:${DOCKER_TAG}
-                docker push localhost:5000/wanderlust-frontend:${DOCKER_TAG}
+                docker push localhost:32100/wanderlust-backend:${DOCKER_TAG}
+                docker push localhost:32100/wanderlust-frontend:${DOCKER_TAG}
                 """
             }
         }
