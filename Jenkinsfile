@@ -54,7 +54,9 @@ pipeline {
                     ${SONAR_HOME}/bin/sonar-scanner \
                     -Dsonar.projectKey=wanderlust \
                     -Dsonar.projectName=wanderlust \
-                    -Dsonar.sources=.
+                    -Dsonar.sources=backend,frontend/src \
+                    -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/** \
+                    -Dsonar.javascript.node.maxspace=4096
                     """
                 }
             }
