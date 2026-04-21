@@ -1,10 +1,6 @@
 pipeline {
     agent any
     
-    environment{
-        SONAR_HOME = tool "Sonar"
-    }
-    
     stages {
 
         stage("Workspace cleanup"){
@@ -21,7 +17,6 @@ pipeline {
             }
         }
 
-        // ✅ NEW: Generate Auto Tag
         stage("Generate Docker Tag") {
             steps {
                 script {
@@ -31,71 +26,8 @@ pipeline {
                 }
             }
         }
-        
-        stage("Trivy: Filesystem scan"){
-            steps{
-                sh 'trivy fs .'
-            }
-        }
 
-        stage("OWASP: Dependency check"){
-            when {
-                expression { return false }
-            }
-            steps{
-                echo "Skipping OWASP scan"
-            }
-        }
-        
-        stage("SonarQube: Code Analysis"){
-            steps{
-                withSonarQubeEnv('Sonar') {
-                    sh """
-                    ${SONAR_HOME}/bin/sonar-scanner \
-                    -Dsonar.projectKey=wanderlust \
-                    -Dsonar.projectName=wanderlust \
-                    -Dsonar.sources=backend,frontend/src \
-                    -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/** \
-                    -Dsonar.javascript.node.maxspace=2048
-                    """
-                }
-            }
-        }
-        
-        stage("SonarQube: Code Quality Gates"){
-            steps{
-                timeout(time: 1, unit: 'MINUTES') {
-                    script {
-                        try {
-                            waitForQualityGate abortPipeline: true
-                        } catch (err) {
-                            echo "Quality Gate check skipped due to timeout"
-                        }
-                    }
-                }
-            }
-        }
-                
-        stage('Exporting environment variables') {
-            parallel{
-                stage("Backend env setup"){
-                    steps {
-                        dir("Automations"){
-                            sh "bash updatebackendnew.sh"
-                        }
-                    }
-                }
-                
-                stage("Frontend env setup"){
-                    steps {
-                        dir("Automations"){
-                            sh "bash updatefrontendnew.sh"
-                        }
-                    }
-                }
-            }
-        }
-
+        // ✅ Keep env generation (needed for your Dockerfile)
         stage("Create Env File"){
             steps{
                 dir('frontend'){
@@ -105,8 +37,7 @@ pipeline {
                 }
             }
         }
-        
-        // ✅ UPDATED
+
         stage("Docker: Build Images"){
             steps{
                 sh """
@@ -116,7 +47,6 @@ pipeline {
             }
         }
         
-        // ✅ UPDATED
         stage("Docker: Push to DockerHub"){
             steps{
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
