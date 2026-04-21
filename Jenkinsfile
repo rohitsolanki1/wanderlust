@@ -31,7 +31,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 script{
-                    git branch: 'main', url: 'https://github.com/rohitsolanki1/Devops-Mega-Project-Jenkins-ArgoCD-EKS.git', credentialsId: 'git-credentials'
+                    git branch: 'main', url: 'git@github.com:rohitsolanki1/Devops-Mega-Project-Jenkins-ArgoCD-EKS.git', credentialsId: 'jenkins-github'
                 }
             }
         }
