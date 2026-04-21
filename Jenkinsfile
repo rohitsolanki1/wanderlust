@@ -56,7 +56,7 @@ pipeline {
                     -Dsonar.projectName=wanderlust \
                     -Dsonar.sources=backend,frontend/src \
                     -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/build/** \
-                    -Dsonar.javascript.node.maxspace=4096
+                    -Dsonar.javascript.node.maxspace=2048
                     """
                 }
             }
