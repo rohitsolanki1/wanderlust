@@ -64,15 +64,5 @@ pipeline {
                 """
             }
         }
-
-        // ✅ IMPORTANT: Force Kubernetes to pull latest
-        stage("Restart Deployment"){
-            steps{
-                sh """
-                kubectl -n wanderlust rollout restart deployment/backend-deployment
-                kubectl -n wanderlust rollout restart deployment/frontend-deployment
-                """
-            }
-        }
     }
 }
