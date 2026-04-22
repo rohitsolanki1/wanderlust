@@ -18,7 +18,8 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: thatgeekcontainer/wanderlust-frontend-beta:v5
+          image: 172.17.10.133:32100/wanderlust-frontend:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 5173
 ---
