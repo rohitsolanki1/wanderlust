@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        REGISTRY = "localhost:32100"   // 🔁 replace with your HOST IP (NOT localhost)
+        REGISTRY = "localhost:32100"   // 🔁 replace with your actual HOST IP
     }
     
     stages {
@@ -35,7 +35,7 @@ pipeline {
             steps{
                 dir('frontend'){
                     sh """
-                    echo "VITE_API_PATH=http://localhost:31100" > .env.docker
+                    echo "VITE_API_PATH=localhost:31100" > .env.docker
                     """
                 }
             }
@@ -45,10 +45,7 @@ pipeline {
             steps{
                 sh """
                 docker build -t ${REGISTRY}/wanderlust-backend:${DOCKER_TAG} ./backend
-                docker tag ${REGISTRY}/wanderlust-backend:${DOCKER_TAG} ${REGISTRY}/wanderlust-backend:latest
-
                 docker build -t ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG} ./frontend
-                docker tag ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG} ${REGISTRY}/wanderlust-frontend:latest
                 """
             }
         }
@@ -57,10 +54,7 @@ pipeline {
             steps{
                 sh """
                 docker push ${REGISTRY}/wanderlust-backend:${DOCKER_TAG}
-                docker push ${REGISTRY}/wanderlust-backend:latest
-
                 docker push ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG}
-                docker push ${REGISTRY}/wanderlust-frontend:latest
                 """
             }
         }
