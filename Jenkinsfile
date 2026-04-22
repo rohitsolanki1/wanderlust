@@ -65,8 +65,8 @@ pipeline {
         stage("Update K8s Manifests"){
             steps{
                 sh """
-                sed -i 's|wanderlust-backend:.*|wanderlust-backend:${DOCKER_TAG}|' k8s/backend.yaml
-                sed -i 's|wanderlust-frontend:.*|wanderlust-frontend:${DOCKER_TAG}|' k8s/frontend.yaml
+                sed -i 's|wanderlust-backend:.*|wanderlust-backend:${DOCKER_TAG}|' kubernetes/backend.yaml
+                sed -i 's|wanderlust-frontend:.*|wanderlust-frontend:${DOCKER_TAG}|' kubernetes/frontend.yaml
                 """
             }
         }
