@@ -1,6 +1,11 @@
 pipeline {
     agent any
     
+    environment {
+        REGISTRY = "localhost:32100"   // 🔁 replace with your HOST IP
+        REPO = "rohitsolanki1/Devops-Mega-Project-Jenkins-ArgoCD-EKS.git"
+    }
+    
     stages {
 
         stage("Workspace cleanup"){
@@ -12,7 +17,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'git@github.com:rohitsolanki1/Devops-Mega-Project-Jenkins-ArgoCD-EKS.git',
+                    url: "git@github.com:${REPO}",
                     credentialsId: 'jenkins-github'
             }
         }
@@ -27,13 +32,13 @@ pipeline {
             }
         }
 
-        // ✅ Keep env generation (needed for your Dockerfile)
+        // ✅ FIXED: use service URL instead of localhost
         stage("Create Env File"){
             steps{
                 dir('frontend'){
-                    sh '''
+                    sh """
                     echo "VITE_API_PATH=http://localhost:31100" > .env.docker
-                    '''
+                    """
                 }
             }
         }
@@ -41,8 +46,8 @@ pipeline {
         stage("Docker: Build Images"){
             steps{
                 sh """
-                docker build -t localhost:32100/wanderlust-backend:${DOCKER_TAG} ./backend
-                docker build -t localhost:32100/wanderlust-frontend:${DOCKER_TAG} ./frontend
+                docker build -t ${REGISTRY}/wanderlust-backend:${DOCKER_TAG} ./backend
+                docker build -t ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG} ./frontend
                 """
             }
         }
@@ -50,9 +55,34 @@ pipeline {
         stage("Docker: Push to Local Registry"){
             steps{
                 sh """
-                docker push localhost:32100/wanderlust-backend:${DOCKER_TAG}
-                docker push localhost:32100/wanderlust-frontend:${DOCKER_TAG}
+                docker push ${REGISTRY}/wanderlust-backend:${DOCKER_TAG}
+                docker push ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG}
                 """
+            }
+        }
+
+        // ✅ NEW: Update Kubernetes manifests
+        stage("Update K8s Manifests"){
+            steps{
+                sh """
+                sed -i 's|wanderlust-backend:.*|wanderlust-backend:${DOCKER_TAG}|' k8s/backend.yaml
+                sed -i 's|wanderlust-frontend:.*|wanderlust-frontend:${DOCKER_TAG}|' k8s/frontend.yaml
+                """
+            }
+        }
+
+        // ✅ NEW: Push changes so ArgoCD can deploy
+        stage("Push Changes to Git"){
+            steps{
+                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh """
+                    git config user.email "jenkins@local"
+                    git config user.name "jenkins"
+                    git add k8s/backend.yaml k8s/frontend.yaml
+                    git commit -m "Update image tag to ${DOCKER_TAG}" || true
+                    git push https://$USER:$PASS@github.com/${REPO} HEAD:main
+                    """
+                }
             }
         }
     }
