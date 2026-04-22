@@ -74,11 +74,11 @@ pipeline {
         // ✅ NEW: Push changes so ArgoCD can deploy
         stage("Push Changes to Git"){
             steps{
-                withCredentials([usernamePassword(credentialsId: 'github-creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                withCredentials([usernamePassword(credentialsId: 'jenkins-github', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                     sh """
                     git config user.email "jenkins@local"
                     git config user.name "jenkins"
-                    git add k8s/backend.yaml k8s/frontend.yaml
+                    git add kubernetes/backend.yaml kubernetes/frontend.yaml
                     git commit -m "Update image tag to ${DOCKER_TAG}" || true
                     git push https://$USER:$PASS@github.com/${REPO} HEAD:main
                     """
