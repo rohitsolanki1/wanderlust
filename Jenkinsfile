@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        REGISTRY = "172.17.10.133:32100"   // 🔁 replace with your HOST IP (NOT localhost)
+        REGISTRY = "localhost:32100"   // 🔁 replace with your HOST IP (NOT localhost)
     }
     
     stages {
