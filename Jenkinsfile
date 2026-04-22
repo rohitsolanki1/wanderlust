@@ -2,8 +2,7 @@ pipeline {
     agent any
     
     environment {
-        REGISTRY = "localhost:32100"   // 🔁 replace with your HOST IP
-        REPO = "rohitsolanki1/Devops-Mega-Project-Jenkins-ArgoCD-EKS.git"
+        REGISTRY = "172.17.10.133:32100"   // 🔁 replace with your HOST IP (NOT localhost)
     }
     
     stages {
@@ -17,7 +16,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 git branch: 'main',
-                    url: "git@github.com:${REPO}",
+                    url: "git@github.com:rohitsolanki1/Devops-Mega-Project-Jenkins-ArgoCD-EKS.git",
                     credentialsId: 'jenkins-github'
             }
         }
@@ -32,12 +31,11 @@ pipeline {
             }
         }
 
-        // ✅ FIXED: use service URL instead of localhost
         stage("Create Env File"){
             steps{
                 dir('frontend'){
                     sh """
-                    echo "VITE_API_PATH=http://localhost:31100" > .env.docker
+                    echo "VITE_API_PATH=http://<HOST_IP>:31100" > .env.docker
                     """
                 }
             }
@@ -47,7 +45,10 @@ pipeline {
             steps{
                 sh """
                 docker build -t ${REGISTRY}/wanderlust-backend:${DOCKER_TAG} ./backend
+                docker tag ${REGISTRY}/wanderlust-backend:${DOCKER_TAG} ${REGISTRY}/wanderlust-backend:latest
+
                 docker build -t ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG} ./frontend
+                docker tag ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG} ${REGISTRY}/wanderlust-frontend:latest
                 """
             }
         }
@@ -56,33 +57,21 @@ pipeline {
             steps{
                 sh """
                 docker push ${REGISTRY}/wanderlust-backend:${DOCKER_TAG}
+                docker push ${REGISTRY}/wanderlust-backend:latest
+
                 docker push ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG}
+                docker push ${REGISTRY}/wanderlust-frontend:latest
                 """
             }
         }
 
-        // ✅ NEW: Update Kubernetes manifests
-        stage("Update K8s Manifests"){
+        // ✅ IMPORTANT: Force Kubernetes to pull latest
+        stage("Restart Deployment"){
             steps{
                 sh """
-                sed -i 's|wanderlust-backend:.*|wanderlust-backend:${DOCKER_TAG}|' kubernetes/backend.yaml
-                sed -i 's|wanderlust-frontend:.*|wanderlust-frontend:${DOCKER_TAG}|' kubernetes/frontend.yaml
+                kubectl -n wanderlust rollout restart deployment/backend-deployment
+                kubectl -n wanderlust rollout restart deployment/frontend-deployment
                 """
-            }
-        }
-
-        // ✅ NEW: Push changes so ArgoCD can deploy
-        stage("Push Changes to Git"){
-            steps{
-                sshagent(['jenkins-github']) {
-                    sh """
-                    git config user.email "jenkins@local"
-                    git config user.name "jenkins"
-                    git add kubernetes/backend.yaml kubernetes/frontend.yaml
-                    git commit -m "Update image tag to ${DOCKER_TAG}" || true
-                    git push origin main
-                    """
-                }
             }
         }
     }
