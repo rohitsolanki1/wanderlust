@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: wanderlust-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/rohitsolanki1/Devops-Mega-Project-Jenkins-ArgoCD-EKS
+    targetRevision: HEAD
+    path: kubernetes
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: wanderlust
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

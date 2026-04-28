@@ -58,5 +58,26 @@ pipeline {
                 """
             }
         }
+
+        stage("Update Kubernetes Manifests") {
+            steps {
+                sh """
+                sed -i 's|image: localhost:32100/wanderlust-backend:latest|image: ${REGISTRY}/wanderlust-backend:${DOCKER_TAG}|g' kubernetes/backend.yaml
+                sed -i 's|image: localhost:32100/wanderlust-frontend:latest|image: ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG}|g' kubernetes/frontend.yaml
+                """
+            }
+        }
+
+        stage("Commit and Push Manifests") {
+            steps {
+                withCredentials([gitUsernamePassword(credentialsId: 'jenkins-github', gitToolName: 'Default')]) {
+                    sh """
+                    git add kubernetes/
+                    git commit -m "Update image tags to ${DOCKER_TAG}" || echo "No changes to commit"
+                    git push origin main
+                    """
+                }
+            }
+        }
     }
 }
