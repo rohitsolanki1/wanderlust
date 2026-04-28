@@ -62,8 +62,8 @@ pipeline {
         stage("Update Kubernetes Manifests") {
             steps {
                 sh """
-                sed -i 's|image: localhost:32100/wanderlust-backend:latest|image: ${REGISTRY}/wanderlust-backend:${DOCKER_TAG}|g' kubernetes/backend.yaml
-                sed -i 's|image: localhost:32100/wanderlust-frontend:latest|image: ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG}|g' kubernetes/frontend.yaml
+                sed -i 's|image: 172.17.10.133:32100/wanderlust-backend:latest|image: ${REGISTRY}/wanderlust-backend:${DOCKER_TAG}|g' kubernetes/backend.yaml
+                sed -i 's|image: 172.17.10.133:32100/wanderlust-frontend:latest|image: ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG}|g' kubernetes/frontend.yaml
                 """
             }
         }
