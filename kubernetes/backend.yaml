@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: backend
-          image: 172.17.10.133:32100/wanderlust-backend:40-62ddf24
+          image: 172.17.10.133:32100/wanderlust-backend:41-da446a4
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
