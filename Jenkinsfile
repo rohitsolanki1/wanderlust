@@ -2,7 +2,7 @@ pipeline {
     agent any
     
     environment {
-        REGISTRY = "localhost:32100"   // 🔁 replace with your actual HOST IP
+        REGISTRY = "172.17.10.133:32100"   // local registry host reachable from the cluster
     }
     
     stages {
@@ -62,8 +62,8 @@ pipeline {
         stage("Update Kubernetes Manifests") {
             steps {
                 sh """
-                sed -i 's|image: 172.17.10.133:32100/wanderlust-backend:latest|image: ${REGISTRY}/wanderlust-backend:${DOCKER_TAG}|g' kubernetes/backend.yaml
-                sed -i 's|image: 172.17.10.133:32100/wanderlust-frontend:latest|image: ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG}|g' kubernetes/frontend.yaml
+                sed -i 's|image: .*wanderlust-backend:.*|image: ${REGISTRY}/wanderlust-backend:${DOCKER_TAG}|g' kubernetes/backend.yaml
+                sed -i 's|image: .*wanderlust-frontend:.*|image: ${REGISTRY}/wanderlust-frontend:${DOCKER_TAG}|g' kubernetes/frontend.yaml
                 """
             }
         }
