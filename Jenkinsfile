@@ -70,13 +70,11 @@ pipeline {
 
         stage("Commit and Push Manifests") {
             steps {
-                withCredentials([gitUsernamePassword(credentialsId: 'jenkins-github', gitToolName: 'Default')]) {
-                    sh """
-                    git add kubernetes/
-                    git commit -m "Update image tags to ${DOCKER_TAG}" || echo "No changes to commit"
-                    git push origin main
-                    """
-                }
+                sh """
+                git add kubernetes/
+                git commit -m "Update image tags to ${DOCKER_TAG}" || echo "No changes to commit"
+                git push origin main
+                """
             }
         }
     }
