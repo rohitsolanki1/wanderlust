@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: 172.17.10.133:32100/wanderlust-frontend:46-2b81bc8
+          image: 172.17.10.133:32100/wanderlust-frontend:47-83b0a48
           imagePullPolicy: Always
           ports:
             - containerPort: 5173
