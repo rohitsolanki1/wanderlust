@@ -71,6 +71,8 @@ pipeline {
         stage("Commit and Push Manifests") {
             steps {
                 sh """
+                git config user.name "rohitsolanki1"
+                git config user.email "aryaveer.rohit@gmail.com"
                 git add kubernetes/
                 git commit -m "Update image tags to ${DOCKER_TAG}" || echo "No changes to commit"
                 git push origin main
