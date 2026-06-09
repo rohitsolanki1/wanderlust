@@ -35,7 +35,7 @@ pipeline {
             steps{
                 dir('frontend'){
                     sh """
-                    echo "VITE_API_PATH=http://172.17.11.133:31100" > .env.docker
+                    echo "VITE_API_PATH=http://172.17.10.133:31100" > .env.docker
                     """
                 }
             }
