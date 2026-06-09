@@ -16,7 +16,7 @@ pipeline {
         stage('Git: Code Checkout') {
             steps {
                 git branch: 'main',
-                    url: "git@github.com:rohitsolanki1/Devops-Mega-Project-Jenkins-ArgoCD-EKS.git",
+                    url: "git@github.com:rohitsolanki1/wanderlust.git",
                     credentialsId: 'jenkins-github'
             }
         }
