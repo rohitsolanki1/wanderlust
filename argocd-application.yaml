@@ -6,7 +6,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/rohitsolanki1/Devops-Mega-Project-Jenkins-ArgoCD-EKS
+    repoURL: https://github.com/rohitsolanki1/wanderlust.git
     targetRevision: HEAD
     path: kubernetes
   destination:
